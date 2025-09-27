@@ -24,11 +24,24 @@ export interface AddTokenResult {
   message: string
 }
 
+interface WatchAssetParams {
+  type: 'ERC20'
+  options: {
+    address: string
+    symbol: string
+    decimals: number
+    image: string
+  }
+}
+
 declare global {
   interface Window {
     ethereum?: {
       isMetaMask?: boolean
-      request: (args: { method: string; params?: any[] }) => Promise<any>
+      request: (args: {
+        method: string
+        params?: any[] | WatchAssetParams | { chainId: string } | [{ chainId: string }]
+      }) => Promise<any>
       on: (event: string, callback: (...args: any[]) => void) => void
       removeAllListeners: (event: string) => void
     }

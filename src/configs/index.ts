@@ -11,6 +11,9 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   arbitrum: arbitrum as NetworkConfig
 }
 
+// Donation configuration
+export const DONATION_ADDRESS = '0x0000000000000000000000000000000000000000'
+
 export const getNetworkByChainId = (chainId: string): NetworkConfig | undefined => {
   return Object.values(NETWORKS).find(network => network.chainId === chainId)
 }

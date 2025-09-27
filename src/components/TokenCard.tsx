@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Token, AddTokenResult } from '../types'
-import { addTokenToWallet } from '../utils/metamask'
+import { addTokenToWallet, checkTokenExists } from '../utils/metamask'
 
 interface TokenCardProps {
   token: Token
@@ -9,6 +9,24 @@ interface TokenCardProps {
 const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [addStatus, setAddStatus] = useState<AddTokenResult | null>(null)
+  const [tokenExists, setTokenExists] = useState<boolean>(false)
+  const [checkingExists, setCheckingExists] = useState(false)
+
+  useEffect(() => {
+    const checkToken = async () => {
+      setCheckingExists(true)
+      try {
+        const exists = await checkTokenExists(token.address)
+        setTokenExists(exists)
+      } catch (error) {
+        console.log('Could not check token existence:', error)
+      } finally {
+        setCheckingExists(false)
+      }
+    }
+
+    checkToken()
+  }, [token.address])
 
   const handleAddToken = async () => {
     setIsLoading(true)
@@ -19,6 +37,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
       setAddStatus(result)
 
       if (result.success) {
+        setTokenExists(true)
         setTimeout(() => setAddStatus(null), 3000)
       }
     } catch (error: any) {
@@ -40,7 +59,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
           alt={`${token.symbol} logo`}
           className="token-logo"
           onError={(e) => {
-            // 如果图片加载失败，显示一个默认的圆形图标
+            // If image loading fails, show a default circular icon
             const img = e.target as HTMLImageElement
             img.src = `data:image/svg+xml;base64,${btoa(`
               <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
@@ -50,7 +69,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
                 </text>
               </svg>
             `)}`
-            img.onerror = null // 防止无限循环
+            img.onerror = null // Prevent infinite loop
           }}
         />
         <span className="token-symbol">{token.symbol}</span>
@@ -66,13 +85,23 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
         Decimals: {token.decimals}
       </div>
 
-      <button
-        className="add-token-button"
-        onClick={handleAddToken}
-        disabled={isLoading}
-      >
-        {isLoading ? 'Adding...' : 'Add to MetaMask'}
-      </button>
+      {checkingExists ? (
+        <button className="add-token-button" disabled>
+          Checking...
+        </button>
+      ) : tokenExists ? (
+        <button className="add-token-button token-exists" disabled>
+          ✓ Already in Wallet
+        </button>
+      ) : (
+        <button
+          className="add-token-button"
+          onClick={handleAddToken}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Adding...' : 'Add to MetaMask'}
+        </button>
+      )}
 
       {addStatus && (
         <div className={`status-message ${addStatus.success ? 'success' : 'error'}`}>

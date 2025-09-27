@@ -5,13 +5,14 @@ import TokenCard from './TokenCard'
 interface TokenListProps {
   tokens: Token[]
   networkName: string
+  searchTerm?: string
 }
 
-const TokenList: React.FC<TokenListProps> = ({ tokens, networkName }) => {
+const TokenList: React.FC<TokenListProps> = ({ tokens, networkName, searchTerm }) => {
   if (!tokens || tokens.length === 0) {
     return (
       <div className="no-tokens">
-        <p>No tokens available for {networkName || 'this network'}.</p>
+        <p>{searchTerm ? `No tokens found matching "${searchTerm}"` : `No tokens available for ${networkName || 'this network'}.`}</p>
       </div>
     )
   }
