@@ -1,0 +1,382 @@
+.App {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  min-height: 100vh;
+}
+
+.app-header {
+  margin-bottom: 3rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.app-header h1 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  font-size: 3rem;
+}
+
+.app-header p {
+  color: #6b7280;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.metamask-warning {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin: 1.5rem 0;
+  box-shadow: 0 10px 25px rgba(251, 191, 36, 0.2);
+}
+
+.install-button,
+.connect-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.install-button:hover,
+.connect-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+.wallet-info {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin: 1.5rem 0;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+}
+
+.wallet-info p {
+  margin: 0.25rem 0;
+  font-weight: 500;
+}
+
+.app-main {
+  margin-top: 3rem;
+}
+
+.network-selector {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.network-selector h3 {
+  color: #374151;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.network-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.network-button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #374151;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.network-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.network-button.active,
+.network-button:hover {
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.network-button.active::before,
+.network-button:hover::before {
+  left: 0;
+}
+
+.tokens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.token-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.token-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.token-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.token-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.token-logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 0.75rem;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.token-symbol {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #111827;
+}
+
+.token-name {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.token-address {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  word-break: break-all;
+  margin-bottom: 0.75rem;
+  background: #f9fafb;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.token-decimals {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.add-token-button {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.875rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.add-token-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.add-token-button:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.status-message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.status-message.success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.status-message.error {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.no-tokens {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  margin: 2rem 0;
+}
+
+.token-list-container {
+  margin-top: 2rem;
+}
+
+.token-list-container h3 {
+  color: #111827;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.75rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+  }
+
+  .app-header p {
+    color: #d1d5db;
+  }
+
+  .network-selector {
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+  }
+
+  .network-selector h3 {
+    color: #f9fafb;
+  }
+
+  .network-button {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    color: #f9fafb;
+  }
+
+  .token-card {
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+  }
+
+  .token-symbol {
+    color: #f9fafb;
+  }
+
+  .token-name {
+    color: #d1d5db;
+  }
+
+  .token-address {
+    background: rgba(31, 41, 55, 0.8);
+    border: 1px solid #4b5563;
+    color: #d1d5db;
+  }
+
+  .token-decimals {
+    color: #d1d5db;
+  }
+
+  .no-tokens {
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+    color: #d1d5db;
+  }
+
+  .token-list-container h3 {
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+    color: #f9fafb;
+  }
+}
+
+@media (max-width: 768px) {
+  .App {
+    padding: 1rem;
+  }
+
+  .app-header {
+    padding: 1.5rem;
+  }
+
+  .app-header h1 {
+    font-size: 2rem;
+  }
+
+  .tokens-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .network-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .network-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}

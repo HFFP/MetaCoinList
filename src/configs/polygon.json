@@ -1,0 +1,48 @@
+{
+  "chainId": "0x89",
+  "chainName": "Polygon Mainnet",
+  "rpcUrls": ["https://polygon-rpc.com/"],
+  "blockExplorerUrls": ["https://polygonscan.com"],
+  "nativeCurrency": {
+    "name": "MATIC",
+    "symbol": "MATIC",
+    "decimals": 18
+  },
+  "tokens": [
+    {
+      "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "symbol": "USDC",
+      "name": "USD Coin (PoS)",
+      "decimals": 6,
+      "logo": "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png"
+    },
+    {
+      "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+      "symbol": "USDT",
+      "name": "(PoS) Tether USD",
+      "decimals": 6,
+      "logo": "https://assets.coingecko.com/coins/images/325/small/Tether.png"
+    },
+    {
+      "address": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+      "symbol": "WBTC",
+      "name": "(PoS) Wrapped BTC",
+      "decimals": 8,
+      "logo": "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png"
+    },
+    {
+      "address": "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
+      "symbol": "LINK",
+      "name": "ChainLink Token",
+      "decimals": 18,
+      "logo": "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png"
+    },
+    {
+      "address": "0xb33EaAd8d922B1083446DC23f610c2567fB5180f",
+      "symbol": "UNI",
+      "name": "Uniswap (PoS)",
+      "decimals": 18,
+      "logo": "https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png"
+    }
+  ]
+}
