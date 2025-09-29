@@ -1,7 +1,7 @@
 {
   "chainId": "0x89",
   "chainName": "Polygon Mainnet",
-  "rpcUrls": ["https://polygon-rpc.com/"],
+  "rpcUrls": ["https://polygon-bor-rpc.publicnode.com"],
   "blockExplorerUrls": ["https://polygonscan.com"],
   "nativeCurrency": {
     "name": "MATIC",
@@ -31,18 +31,11 @@
       "logo": "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png"
     },
     {
-      "address": "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
-      "symbol": "LINK",
-      "name": "ChainLink Token",
+      "address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
       "decimals": 18,
-      "logo": "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png"
-    },
-    {
-      "address": "0xb33EaAd8d922B1083446DC23f610c2567fB5180f",
-      "symbol": "UNI",
-      "name": "Uniswap (PoS)",
-      "decimals": 18,
-      "logo": "https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png"
+      "logo": "https://assets.coingecko.com/coins/images/2518/small/weth.png"
     }
   ]
 }

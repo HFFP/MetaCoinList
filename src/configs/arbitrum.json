@@ -1,7 +1,7 @@
 {
   "chainId": "0xa4b1",
   "chainName": "Arbitrum One",
-  "rpcUrls": ["https://arb1.arbitrum.io/rpc"],
+  "rpcUrls": ["https://arbitrum-one-rpc.publicnode.com"],
   "blockExplorerUrls": ["https://arbiscan.io"],
   "nativeCurrency": {
     "name": "Ether",
@@ -31,18 +31,11 @@
       "logo": "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png"
     },
     {
-      "address": "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
-      "symbol": "LINK",
-      "name": "ChainLink Token",
+      "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
       "decimals": 18,
-      "logo": "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png"
-    },
-    {
-      "address": "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0",
-      "symbol": "UNI",
-      "name": "Uniswap",
-      "decimals": 18,
-      "logo": "https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png"
+      "logo": "https://assets.coingecko.com/coins/images/2518/small/weth.png"
     }
   ]
 }

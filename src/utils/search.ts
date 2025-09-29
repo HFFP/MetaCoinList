@@ -1,5 +1,5 @@
-import { Token, NetworkConfig } from '../types'
-import { getAllNetworks } from '../configs'
+import {NetworkConfig, Token} from '../types'
+import {getAllNetworks} from '../configs'
 
 export interface SearchResult {
   token: Token
@@ -61,16 +61,19 @@ export const queryTokenFromRPC = async (
 
     const requests = [
       {
+        jsonrpc: '2.0',
         method: 'eth_call',
         params: [{ to: address, data: symbolSig }, 'latest'],
         id: 1
       },
       {
+        jsonrpc: '2.0',
         method: 'eth_call',
         params: [{ to: address, data: nameSig }, 'latest'],
         id: 2
       },
       {
+        jsonrpc: '2.0',
         method: 'eth_call',
         params: [{ to: address, data: decimalsSig }, 'latest'],
         id: 3
@@ -78,13 +81,22 @@ export const queryTokenFromRPC = async (
     ]
 
     const responses = await Promise.all(
-      requests.map(request =>
-        fetch(rpcUrl, {
+      requests.map(async request => {
+        const response = await fetch(rpcUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(request)
-        }).then(res => res.json())
-      )
+          body: JSON.stringify(request),
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        })
+        const json = await response.json()
+
+        // Log any RPC errors
+        if (json.error) {
+          console.error(`RPC error for ${networkConfig.chainName}:`, json.error)
+        }
+
+        return json
+      })
     )
 
     // Parse responses
@@ -92,7 +104,22 @@ export const queryTokenFromRPC = async (
     const nameResponse = responses[1]?.result
     const decimalsResponse = responses[2]?.result
 
+    // Check for RPC errors
+    if (responses[0]?.error || responses[1]?.error || responses[2]?.error) {
+      console.error(`RPC errors for ${networkConfig.chainName}:`, {
+        symbol: responses[0]?.error,
+        name: responses[1]?.error,
+        decimals: responses[2]?.error
+      })
+      return null
+    }
+
     if (!symbolResponse || !nameResponse || !decimalsResponse) {
+      console.log(`Empty responses for ${networkConfig.chainName}:`, {
+        symbolResponse,
+        nameResponse,
+        decimalsResponse
+      })
       return null
     }
 
@@ -164,8 +191,10 @@ export const searchTokenFromAllRPCs = async (address: string): Promise<SearchRes
   // Query all networks in parallel
   const rpcPromises = networks.map(async network => {
     try {
+      console.log(`Querying ${network.chainName} for address ${address}`)
       const token = await queryTokenFromRPC(address, network)
       if (token) {
+        console.log(`Found token on ${network.chainName}:`, token)
         return {
           token,
           networkName: network.chainName,
@@ -173,6 +202,8 @@ export const searchTokenFromAllRPCs = async (address: string): Promise<SearchRes
           isFromRPC: true,
           blockExplorerUrl: network.blockExplorerUrls?.[0]
         }
+      } else {
+        console.log(`No token found on ${network.chainName}`)
       }
     } catch (error) {
       console.error(`RPC query failed for ${network.chainName}:`, error)
@@ -208,14 +239,12 @@ export const searchTokens = async (searchTerm: string): Promise<SearchResult[]> 
     const allResults = [...configResults, ...rpcResults]
 
     // Remove duplicates (same address on same network)
-    const uniqueResults = allResults.filter((result, index, array) => {
+    return allResults.filter((result, index, array) => {
       return array.findIndex(r =>
-        r.token.address.toLowerCase() === result.token.address.toLowerCase() &&
-        r.networkChainId === result.networkChainId
+          r.token.address.toLowerCase() === result.token.address.toLowerCase() &&
+          r.networkChainId === result.networkChainId
       ) === index
     })
-
-    return uniqueResults
   }
 
   return configResults

@@ -8,14 +8,13 @@
 .app-container {
   display: flex;
   min-height: 100vh;
-  max-width: 1600px;
-  margin: 0 auto;
   backdrop-filter: blur(10px);
+  width: 100%;
 }
 
 /* Left sidebar - 28% */
 .app-sidebar {
-  flex: 0 0 28%;
+  flex: 0 0 400px;
   background: rgba(17, 24, 39, 0.95);
   backdrop-filter: blur(20px);
   border-right: 1px solid rgba(75, 85, 99, 0.3);
@@ -25,6 +24,7 @@
   height: 100vh;
   overflow-y: auto;
 }
+
 
 .sidebar-content {
   height: 100%;
@@ -129,7 +129,7 @@
 
 /* Right main content area - 72% */
 .app-main {
-  flex: 0 0 72%;
+  flex: 1;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -456,7 +456,7 @@
 /* Common clickable address container styles */
 .clickable-address {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.5rem;
   cursor: pointer;
@@ -564,11 +564,12 @@
 
 
 .tokens-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 350px));
   gap: 1.5rem;
   margin-top: 2rem;
   max-width: 100%;
+  justify-content: start;
 }
 
 .token-card {
@@ -580,9 +581,9 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  flex: 1 1 320px;
-  min-width: 320px;
-  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 
@@ -673,9 +674,8 @@
 
 .token-address .address-text {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
+  line-height: 1.4;
 }
 
 .token-address.clickable-address:hover {
@@ -724,6 +724,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 1rem;
+  margin-top: auto;
 }
 
 .add-token-button:hover {

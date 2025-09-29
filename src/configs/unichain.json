@@ -1,37 +1,37 @@
 {
-  "chainId": "0x38",
-  "chainName": "BNB Smart Chain",
-  "rpcUrls": ["https://bsc-dataseed1.binance.org/"],
-  "blockExplorerUrls": ["https://bscscan.com"],
+  "chainId": "0x82",
+  "chainName": "Unichain",
+  "rpcUrls": ["https://unichain-rpc.publicnode.com"],
+  "blockExplorerUrls": ["https://uniscan.xyz"],
   "nativeCurrency": {
-    "name": "BNB",
-    "symbol": "BNB",
+    "name": "Ether",
+    "symbol": "ETH",
     "decimals": 18
   },
   "tokens": [
     {
-      "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+      "address": "0x078d782b760474a361dda0af3839290b0ef57ad6",
       "symbol": "USDC",
       "name": "USD Coin",
-      "decimals": 18,
+      "decimals": 6,
       "logo": "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png"
     },
     {
-      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "address": "0x9151434b16b9763660705744891fa906f660ecc5",
       "symbol": "USDT",
       "name": "Tether USD",
-      "decimals": 18,
+      "decimals": 6,
       "logo": "https://assets.coingecko.com/coins/images/325/small/Tether.png"
     },
     {
-      "address": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+      "address": "0x927b51f251480a681271180da4de28d44ec4afb8",
       "symbol": "WBTC",
       "name": "Wrapped BTC",
       "decimals": 8,
       "logo": "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png"
     },
     {
-      "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+      "address": "0x4200000000000000000000000000000000000006",
       "symbol": "WETH",
       "name": "Wrapped Ether",
       "decimals": 18,
