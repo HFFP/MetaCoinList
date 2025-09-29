@@ -1,28 +1,37 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import './App.css'
 import { NetworkConfig } from './types'
 import { getNetworkByChainId, getAllNetworks, DONATION_ADDRESS } from './configs'
 import TokenList from './components/TokenList'
+import SearchResults from './components/SearchResults'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useChainId } from 'wagmi'
+import { useAccount, useChainId, useDisconnect } from 'wagmi'
 import { switchToNetwork } from './utils/metamask'
+import { searchTokens, SearchResult } from './utils/search'
 
 const App: React.FC = () => {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
+  const { disconnect } = useDisconnect()
   const [currentNetwork, setCurrentNetwork] = useState<NetworkConfig | null>(null)
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false)
   const [isNetworkSwitching, setIsNetworkSwitching] = useState(false)
-  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null)
 
+  // Initialize with Ethereum mainnet as default
   useEffect(() => {
-    if (chainId) {
+    if (isConnected && chainId) {
       const network = getNetworkByChainId(`0x${chainId.toString(16)}`)
-      setCurrentNetwork(network || null)
+      setCurrentNetwork(network || getAllNetworks()[0]) // fallback to first network (Ethereum)
+    } else if (!isConnected) {
+      // Default to Ethereum mainnet when not connected
+      setCurrentNetwork(getAllNetworks()[0])
     }
-  }, [chainId])
+  }, [chainId, isConnected])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,32 +48,38 @@ const App: React.FC = () => {
   }, [showNetworkDropdown])
 
   useEffect(() => {
-    const handleModalClickOutside = (event: MouseEvent) => {
+    const handleAddressClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
-      // Close modal if click is not on wallet address button or modal content
-      if (!target.closest('.wallet-address') && !target.closest('.wallet-modal')) {
-        setShowAddressModal(false)
+      // Close dropdown if click is not on wallet address container
+      if (!target.closest('.wallet-address-container')) {
+        setShowAddressDropdown(false)
       }
     }
 
-    if (showAddressModal) {
-      document.addEventListener('click', handleModalClickOutside)
-      return () => document.removeEventListener('click', handleModalClickOutside)
+    if (showAddressDropdown) {
+      document.addEventListener('click', handleAddressClickOutside)
+      return () => document.removeEventListener('click', handleAddressClickOutside)
     }
-  }, [showAddressModal])
+  }, [showAddressDropdown])
 
 
   const handleNetworkSelect = async (network: NetworkConfig) => {
     setIsNetworkSwitching(true)
     setShowNetworkDropdown(false)
 
-    try {
-      await switchToNetwork(network)
+    if (isConnected) {
+      try {
+        await switchToNetwork(network)
+        setCurrentNetwork(network)
+      } catch (error: any) {
+        console.error('Failed to switch network:', error)
+        showToast('Failed to switch network: ' + error.message, 'error')
+      } finally {
+        setIsNetworkSwitching(false)
+      }
+    } else {
+      // Just change the display network when not connected
       setCurrentNetwork(network)
-    } catch (error: any) {
-      console.error('Failed to switch network:', error)
-      alert('Failed to switch network: ' + error.message)
-    } finally {
       setIsNetworkSwitching(false)
     }
   }
@@ -91,9 +106,55 @@ const App: React.FC = () => {
     }
   }
 
+  const handleDisconnect = () => {
+    disconnect()
+    setShowAddressDropdown(false)
+    showToast('Wallet disconnected', 'success')
+  }
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({message, type})
     setTimeout(() => setToast(null), 3000)
+  }
+
+  // Search functionality with debouncing
+  const performSearch = useCallback(async (term: string) => {
+    if (!term.trim()) {
+      setSearchResults([])
+      setIsSearching(false)
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const results = await searchTokens(term)
+      setSearchResults(results)
+    } catch (error) {
+      console.error('Search failed:', error)
+      showToast('Search failed. Please try again.', 'error')
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }, [])
+
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      performSearch(searchTerm)
+    }, 500) // 500ms debounce
+
+    return () => clearTimeout(timer)
+  }, [searchTerm, performSearch])
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchTerm(value)
+
+    // Show loading immediately for address searches
+    if (value.length >= 3) {
+      setIsSearching(true)
+    }
   }
 
 
@@ -122,8 +183,11 @@ const App: React.FC = () => {
             <div className="donation-section">
               <h3>Support Project</h3>
               <p>If this project helps you, consider supporting with a donation:</p>
-              <div className="donation-address" onClick={handleCopyDonationAddress}>
+              <div className="donation-address clickable-address" onClick={handleCopyDonationAddress}>
                 <span className="donation-addr">{DONATION_ADDRESS}</span>
+                <svg className="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg>
               </div>
             </div>
           </div>
@@ -135,109 +199,110 @@ const App: React.FC = () => {
             <div className="search-section">
               <input
                 type="text"
-                placeholder="Search token name or symbol..."
+                placeholder="Search token name, symbol, or contract address..."
                 className="search-input"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
               />
             </div>
 
             <div className="wallet-section">
-              {!isConnected ? (
-                <ConnectButton
-                  showBalance={false}
-                  chainStatus="none"
-                  accountStatus="avatar"
-                />
-              ) : (
-                <div className="wallet-connected">
-                  <div className="wallet-controls">
-                    {/* Network selection section */}
-                    {currentNetwork && (
-                      <div className="network-dropdown-container">
-                        <button
-                          className="current-network"
-                          onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
-                          disabled={isNetworkSwitching}
-                        >
-                          <span className="network-indicator"></span>
-                          {isNetworkSwitching ? 'Switching...' : currentNetwork.chainName.replace(' Mainnet', '').replace(' One', '')}
-                          <span className={`dropdown-arrow ${showNetworkDropdown ? 'open' : ''}`}>
-                            ▼
-                          </span>
-                        </button>
+              <div className="wallet-controls">
+                {/* Network selection section - always show */}
+                {currentNetwork && (
+                  <div className="network-dropdown-container">
+                    <button
+                      className="current-network"
+                      onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
+                      disabled={isNetworkSwitching}
+                    >
+                      <span className="network-indicator"></span>
+                      {isNetworkSwitching ? 'Switching...' : currentNetwork.chainName.replace(' Mainnet', '').replace(' One', '')}
+                      <span className={`dropdown-arrow ${showNetworkDropdown ? 'open' : ''}`}>
+                        ▼
+                      </span>
+                    </button>
 
-                        {showNetworkDropdown && (
-                          <div className="network-dropdown">
-                            {getAllNetworks().map((network) => (
-                              <button
-                                key={network.chainId}
-                                className={`network-option ${currentNetwork?.chainId === network.chainId ? 'active' : ''}`}
-                                onClick={() => handleNetworkSelect(network)}
-                              >
-                                <span className="network-indicator"></span>
-                                {network.chainName}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                    {showNetworkDropdown && (
+                      <div className="network-dropdown">
+                        {getAllNetworks().map((network) => (
+                          <button
+                            key={network.chainId}
+                            className={`network-option ${currentNetwork?.chainId === network.chainId ? 'active' : ''}`}
+                            onClick={() => handleNetworkSelect(network)}
+                          >
+                            <span className="network-indicator"></span>
+                            {network.chainName}
+                          </button>
+                        ))}
                       </div>
                     )}
+                  </div>
+                )}
 
-                    {/* Wallet address section */}
+                {/* Wallet connection/address section */}
+                {!isConnected ? (
+                  <ConnectButton
+                    showBalance={false}
+                    chainStatus="none"
+                    accountStatus="avatar"
+                  />
+                ) : (
+                  <div className="wallet-address-container">
                     <button
                       className="wallet-address"
-                      onClick={() => setShowAddressModal(true)}
+                      onClick={() => setShowAddressDropdown(!showAddressDropdown)}
                     >
                       <span className="address-indicator"></span>
                       <span className="address-text">
                         {address?.slice(0, 6)}...{address?.slice(-4)}
                       </span>
                     </button>
-                  </div>
 
-                  {/* Address modal */}
-                  {showAddressModal && (
-                    <>
-                      <div className="modal-backdrop"></div>
-                      <div className="wallet-modal">
-                        <div className="modal-header">
-                          <h3>Wallet Details</h3>
-                        </div>
-                        <div className="modal-content">
-                          <div className="full-address">
-                            <span className="address-label">Address:</span>
-                            <span className="full-address-text">{address}</span>
+                    {/* Address dropdown */}
+                    {showAddressDropdown && (
+                      <div className="wallet-address-dropdown">
+                        <div className="dropdown-row">
+                          <div
+                            className="full-address-display clickable-address"
+                            onClick={handleCopyAddress}
+                            title="Click to copy"
+                          >
+                            <span className="address-text-full">{address}</span>
+                            <svg className="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
                           </div>
-                          <div className="modal-actions">
-                            <button className="copy-button" onClick={handleCopyAddress}>
-                              📋 Copy Address
-                            </button>
-                            <ConnectButton
-                              showBalance={false}
-                              chainStatus="none"
-                              accountStatus="avatar"
-                            />
-                          </div>
+                          <button
+                            className="custom-disconnect-button"
+                            onClick={handleDisconnect}
+                          >
+                            Disconnect
+                          </button>
                         </div>
                       </div>
-                    </>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           <div className="token-content">
-            {isConnected && address && currentNetwork && (
-              <TokenList
-                tokens={currentNetwork.tokens.filter(token =>
-                  token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  token.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-                )}
-                networkName={currentNetwork.chainName}
+            {searchTerm.trim() ? (
+              <SearchResults
+                results={searchResults}
                 searchTerm={searchTerm}
+                isLoading={isSearching}
               />
+            ) : (
+              currentNetwork && (
+                <TokenList
+                  tokens={currentNetwork.tokens}
+                  networkName={currentNetwork.chainName}
+                  blockExplorerUrl={currentNetwork.blockExplorerUrls?.[0]}
+                />
+              )
             )}
           </div>
         </main>

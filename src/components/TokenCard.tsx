@@ -4,9 +4,12 @@ import { addTokenToWallet, checkTokenExists } from '../utils/metamask'
 
 interface TokenCardProps {
   token: Token
+  blockExplorerUrl?: string
+  networkName?: string
+  showNetworkBadge?: boolean
 }
 
-const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
+const TokenCard: React.FC<TokenCardProps> = ({ token, blockExplorerUrl, networkName, showNetworkBadge = false }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [addStatus, setAddStatus] = useState<AddTokenResult | null>(null)
   const [tokenExists, setTokenExists] = useState<boolean>(false)
@@ -51,6 +54,24 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
     }
   }
 
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(token.address)
+      setAddStatus({
+        success: true,
+        message: 'Address copied to clipboard!'
+      })
+      setTimeout(() => setAddStatus(null), 2000)
+    } catch (error) {
+      console.error('Failed to copy address:', error)
+      setAddStatus({
+        success: false,
+        message: 'Failed to copy address'
+      })
+      setTimeout(() => setAddStatus(null), 2000)
+    }
+  }
+
   return (
     <div className="token-card">
       <div className="token-header">
@@ -72,17 +93,38 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
             img.onerror = null // Prevent infinite loop
           }}
         />
-        <span className="token-symbol">{token.symbol}</span>
+        <div className="token-symbol-container">
+          <span className="token-symbol">{token.symbol}</span>
+          {showNetworkBadge && networkName && (
+            <span className="network-badge-inline">
+              {networkName.replace(' Mainnet', '').replace(' One', '')}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="token-name">{token.name}</div>
-
-      <div className="token-address">
-        Contract: {token.address}
+      <div className="token-name-row">
+        <div className="token-name">{token.name}</div>
+        {blockExplorerUrl && (
+          <a
+            href={`${blockExplorerUrl}/token/${token.address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="explorer-link"
+          >
+            <svg className="explorer-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+            </svg>
+            View on Explorer
+          </a>
+        )}
       </div>
 
-      <div className="token-decimals">
-        Decimals: {token.decimals}
+      <div className="token-address clickable-address" onClick={handleCopyAddress} title="Click to copy">
+        <span className="address-text">{token.address}</span>
+        <svg className="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+        </svg>
       </div>
 
       {checkingExists ? (
@@ -91,7 +133,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
         </button>
       ) : tokenExists ? (
         <button className="add-token-button token-exists" disabled>
-          ✓ Already in Wallet
+          ✓ Previously Added
         </button>
       ) : (
         <button

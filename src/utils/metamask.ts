@@ -70,26 +70,32 @@ export const switchToNetwork = async (networkConfig: NetworkConfig): Promise<voi
 }
 
 export const checkTokenExists = async (tokenAddress: string): Promise<boolean> => {
+  // MetaMask doesn't provide a standard API to check if a token is already added
+  // We'll use localStorage to track tokens that were successfully added
   if (!isMetaMaskInstalled()) {
     return false
   }
 
   try {
-    // Try to get token balance to check if already added
-    const balance = await window.ethereum!.request({
-      method: 'eth_call',
-      params: [
-        {
-          to: tokenAddress,
-          data: '0x70a08231000000000000000000000000' + (await getCurrentAccount()).slice(2)
-        },
-        'latest'
-      ]
-    })
-    return balance !== null
+    const addedTokens = JSON.parse(localStorage.getItem('metamask-added-tokens') || '[]')
+    const currentAccount = await getCurrentAccount()
+    const key = `${currentAccount.toLowerCase()}-${tokenAddress.toLowerCase()}`
+    return addedTokens.includes(key)
   } catch (error) {
-    // If call fails, token might not exist or not added
     return false
+  }
+}
+
+const markTokenAsAdded = (tokenAddress: string, account: string) => {
+  try {
+    const addedTokens = JSON.parse(localStorage.getItem('metamask-added-tokens') || '[]')
+    const key = `${account.toLowerCase()}-${tokenAddress.toLowerCase()}`
+    if (!addedTokens.includes(key)) {
+      addedTokens.push(key)
+      localStorage.setItem('metamask-added-tokens', JSON.stringify(addedTokens))
+    }
+  } catch (error) {
+    console.error('Failed to mark token as added:', error)
   }
 }
 
@@ -100,6 +106,7 @@ const getCurrentAccount = async (): Promise<string> => {
   return accounts[0] || ''
 }
 
+
 export const addTokenToWallet = async (tokenConfig: Token): Promise<AddTokenResult> => {
   if (!isMetaMaskInstalled()) {
     throw new Error('MetaMask is not installed')
@@ -107,14 +114,14 @@ export const addTokenToWallet = async (tokenConfig: Token): Promise<AddTokenResu
 
   console.log('Adding token:', tokenConfig)
 
-  // Check if token is already added
+  // Check if token is already tracked as added
   try {
     const tokenExists = await checkTokenExists(tokenConfig.address)
     if (tokenExists) {
-      return { success: true, message: 'Token already exists in wallet!' }
+      return { success: true, message: 'Token already tracked as added!' }
     }
   } catch (error) {
-    console.log('Could not check if token exists, proceeding with add')
+    console.log('Could not check token tracking status, proceeding with add')
   }
 
   try {
@@ -124,16 +131,16 @@ export const addTokenToWallet = async (tokenConfig: Token): Promise<AddTokenResu
         type: 'ERC20',
         options: {
           address: tokenConfig.address,
-          symbol: tokenConfig.symbol,
-          decimals: tokenConfig.decimals,
-          image: tokenConfig.logo,
         },
       },
-    })
+    } as any)
 
     console.log('MetaMask response:', result)
 
     if (result === true) {
+      // Mark token as added in localStorage
+      const currentAccount = await getCurrentAccount()
+      markTokenAsAdded(tokenConfig.address, currentAccount)
       return { success: true, message: 'Token added successfully!' }
     } else {
       return { success: false, message: 'Token addition was cancelled.' }
@@ -170,7 +177,14 @@ export const getAccountBalance = async (account: string, tokenAddress?: string):
 // Listen for account changes
 export const onAccountsChanged = (callback: (accounts: string[]) => void): void => {
   if (isMetaMaskInstalled()) {
-    window.ethereum!.on('accountsChanged', callback)
+    window.ethereum!.on('accountsChanged', (accounts: string[]) => {
+      // Clear token tracking when account changes since tokens are account-specific
+      if (accounts.length === 0) {
+        // User disconnected, could clear all tracking or keep it
+        console.log('User disconnected from MetaMask')
+      }
+      callback(accounts)
+    })
   }
 }
 

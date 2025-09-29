@@ -6,9 +6,10 @@ interface TokenListProps {
   tokens: Token[]
   networkName: string
   searchTerm?: string
+  blockExplorerUrl?: string
 }
 
-const TokenList: React.FC<TokenListProps> = ({ tokens, networkName, searchTerm }) => {
+const TokenList: React.FC<TokenListProps> = ({ tokens, networkName, searchTerm, blockExplorerUrl }) => {
   if (!tokens || tokens.length === 0) {
     return (
       <div className="no-tokens">
@@ -22,7 +23,13 @@ const TokenList: React.FC<TokenListProps> = ({ tokens, networkName, searchTerm }
       <h3>Available Tokens on {networkName}</h3>
       <div className="tokens-grid">
         {tokens.map((token) => (
-          <TokenCard key={token.address} token={token} />
+          <TokenCard
+            key={token.address}
+            token={token}
+            blockExplorerUrl={blockExplorerUrl}
+            networkName={networkName}
+            showNetworkBadge={true}
+          />
         ))}
       </div>
     </div>
